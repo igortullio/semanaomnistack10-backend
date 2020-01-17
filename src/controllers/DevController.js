@@ -1,7 +1,8 @@
 const axios = require('axios');
 const https = require('https');
-const Dev = require('../models/Dev')
-const parseStringAsArray = require('../utils/parseStringAsArray').parseStringAsArray
+const Dev = require('../models/Dev');
+const parseStringAsArray = require('../utils/parseStringAsArray').parseStringAsArray;
+const { findConnections, sendMessage } = require('../websocket');
 
 async function index (request, response) {
     const devs = await Dev.find();
@@ -35,6 +36,12 @@ async function store (request, response) {
             techs: techsArray,
             location
         })
+
+      const sendSocketMessageTo = findConnections(
+        { latitude, longitude },
+        techsArray
+      )
+      sendMessage(sendSocketMessageTo, 'new-dev', dev);
     }
     return response.json(dev);
 }
